@@ -1,8 +1,9 @@
 from django.contrib import admin
 
+from .models import Category, Product  # Импортируем наши модели
+
 # Register your models here.
 
-from .models import Product, Category  # Импортируем наши модели
 
 
 # Декоратор @admin.register регистрирует модель автоматически
