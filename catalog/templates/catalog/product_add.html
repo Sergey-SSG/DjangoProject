@@ -1,0 +1,30 @@
+{% extends "catalog/base.html" %}
+{% load static %}
+{% block title %}Добавить товар{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">Добавление нового товара</h2>
+
+  <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+    {% csrf_token %}
+    <div class="mb-3">
+      {{ form.name.label_tag }} {{ form.name }}
+    </div>
+    <div class="mb-3">
+      {{ form.description.label_tag }} {{ form.description }}
+    </div>
+    <div class="mb-3">
+      {{ form.image.label_tag }} {{ form.image }}
+    </div>
+    <div class="mb-3">
+      {{ form.category.label_tag }} {{ form.category }}
+    </div>
+    <div class="mb-3">
+      {{ form.price.label_tag }} {{ form.price }}
+    </div>
+
+    <button type="submit" class="btn btn-success">Сохранить</button>
+  </form>
+</div>
+{% endblock %}
