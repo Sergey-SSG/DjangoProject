@@ -1,7 +1,6 @@
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, TemplateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, TemplateView, DeleteView
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
-from django.shortcuts import redirect
 from .models import Product
 from .forms import ProductForm
 
@@ -48,6 +47,12 @@ class ProductUpdateView(UpdateView):
 
     def get_success_url(self):
         return reverse("catalog:product_detail", kwargs={"pk": self.object.pk})
+
+
+class ProductDeleteView(DeleteView):
+    model = Product
+    template_name = 'catalog/product_confirm_delete.html'
+    success_url = reverse_lazy('products:home')
 
 # from django.core.paginator import Paginator
 # from django.http import HttpResponse
