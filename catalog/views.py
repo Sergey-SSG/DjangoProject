@@ -3,6 +3,7 @@ from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from .models import Product
 from .forms import ProductForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 class HomeView(ListView):
@@ -25,13 +26,13 @@ class ContactsView(TemplateView):
         return self.get(request, *args, **kwargs)
 
 
-class ProductDetailView(DetailView):
+class ProductDetailView(LoginRequiredMixin, DetailView):
     model = Product
     template_name = "catalog/product_detail.html"
     context_object_name = "product"
 
 
-class ProductCreateView(CreateView):
+class ProductCreateView(LoginRequiredMixin, CreateView):
     model = Product
     form_class = ProductForm
     template_name = "catalog/product_add.html"
@@ -40,7 +41,7 @@ class ProductCreateView(CreateView):
         return reverse("catalog:product_detail", kwargs={"pk": self.object.pk})
 
 
-class ProductUpdateView(UpdateView):
+class ProductUpdateView(LoginRequiredMixin, UpdateView):
     model = Product
     form_class = ProductForm
     template_name = "catalog/product_edit.html"
@@ -49,7 +50,7 @@ class ProductUpdateView(UpdateView):
         return reverse("catalog:product_detail", kwargs={"pk": self.object.pk})
 
 
-class ProductDeleteView(DeleteView):
+class ProductDeleteView(LoginRequiredMixin, DeleteView):
     model = Product
     template_name = 'catalog/product_confirm_delete.html'
     success_url = reverse_lazy('products:home')
