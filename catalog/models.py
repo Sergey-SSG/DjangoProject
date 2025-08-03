@@ -1,8 +1,7 @@
+from django.conf import settings
 from unicodedata import category
 
 from django.db import models
-
-# Create your models here.
 
 
 class Category(models.Model):
@@ -18,6 +17,10 @@ class Category(models.Model):
 
 
 class Product(models.Model):
+    STATUS_CHOICES = [
+        ('draft', 'Черновик'),
+        ('published', 'Опубликован'),
+    ]
     name = models.CharField(max_length=255, verbose_name="Наименование")
     description = models.TextField(blank=True, verbose_name="Описание")
     image = models.ImageField(upload_to="products/", verbose_name="Изображение")
@@ -35,10 +38,16 @@ class Product(models.Model):
         auto_now=True, verbose_name="Дата последнего изменения"
     )
 
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='products')
+
     class Meta:
         verbose_name = "Продукт"
         verbose_name_plural = "Продукты"
         ordering = ["category", "name"]
+        permissions = [
+            ('can_unpublish_product', 'Может отменять публикацию продукта'),
+        ]
 
     def __str__(self):
         return self.name
