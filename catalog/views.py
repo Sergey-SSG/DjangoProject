@@ -1,9 +1,12 @@
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, TemplateView, DeleteView
+from django.views.generic import (
+    ListView, DetailView, CreateView, UpdateView, TemplateView, DeleteView
+)
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+
 from .models import Product
 from .forms import ProductForm
-from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 class HomeView(ListView):
@@ -31,6 +34,12 @@ class ProductDetailView(LoginRequiredMixin, DetailView):
     template_name = "catalog/product_detail.html"
     context_object_name = "product"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_groups = self.request.user.groups.values_list("name", flat=True)
+        context["is_moderator"] = "Модератор продуктов" in user_groups
+        return context
+
 
 class ProductCreateView(LoginRequiredMixin, CreateView):
     model = Product
@@ -40,8 +49,12 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         return reverse("catalog:product_detail", kwargs={"pk": self.object.pk})
 
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
-class ProductUpdateView(LoginRequiredMixin, UpdateView):
+
+class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Product
     form_class = ProductForm
     template_name = "catalog/product_edit.html"
@@ -49,11 +62,20 @@ class ProductUpdateView(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         return reverse("catalog:product_detail", kwargs={"pk": self.object.pk})
 
+    def test_func(self):
+        product = self.get_object()
+        return self.request.user == product.owner
 
-class ProductDeleteView(LoginRequiredMixin, DeleteView):
+
+class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Product
-    template_name = 'catalog/product_confirm_delete.html'
-    success_url = reverse_lazy('products:home')
+    template_name = "catalog/product_confirm_delete.html"
+    success_url = reverse_lazy('catalog:home')
+
+    def test_func(self):
+        product = self.get_object()
+        user = self.request.user
+        return user == product.owner or user.groups.filter(name="Модератор продуктов").exists()
 
 # from django.core.paginator import Paginator
 # from django.http import HttpResponse

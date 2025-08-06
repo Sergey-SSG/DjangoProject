@@ -20,8 +20,12 @@
             <p><small>Создано: {{ product.created_at|date:"d.m.Y H:i" }}</small></p>
             <p><small>Обновлено: {{ product.updated_at|date:"d.m.Y H:i" }}</small></p>
             <a href="{% url 'catalog:home' %}" class="btn btn-secondary mt-3">Назад к каталогу</a>
+            {% if request.user == product.owner %}
             <a href="{% url 'catalog:product_edit' product.pk %}" class="btn btn-warning mt-3">Редактировать</a>
             <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-danger mt-3">Удалить</a>
+            {% elif is_moderator %}
+            <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-danger mt-3">Удалить</a>
+            {% endif %}
         </div>
     </div>
 </div>
