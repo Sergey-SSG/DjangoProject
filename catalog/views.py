@@ -1,3 +1,7 @@
+from django.shortcuts import get_object_or_404, render
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.views.decorators.cache import cache_page
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, TemplateView, DeleteView
 )
@@ -5,8 +9,9 @@ from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
-from .models import Product
+from .models import Product, Category
 from .forms import ProductForm
+from .services import get_products_by_category
 
 
 class HomeView(ListView):
@@ -29,6 +34,7 @@ class ContactsView(TemplateView):
         return self.get(request, *args, **kwargs)
 
 
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class ProductDetailView(LoginRequiredMixin, DetailView):
     model = Product
     template_name = "catalog/product_detail.html"
@@ -76,6 +82,16 @@ class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         product = self.get_object()
         user = self.request.user
         return user == product.owner or user.groups.filter(name="Модератор продуктов").exists()
+
+
+class ProductsByCategoryView(View):
+    def get(self, request, pk):
+        category = get_object_or_404(Category, pk=pk)
+        products = get_products_by_category(category)
+        return render(request, 'catalog/products_by_category.html', {
+            'category': category,
+            'products': products
+        })
 
 # from django.core.paginator import Paginator
 # from django.http import HttpResponse

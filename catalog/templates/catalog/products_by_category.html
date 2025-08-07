@@ -1,0 +1,26 @@
+{% extends "catalog/base.html" %}
+{% block title %}{{ category.name }} — Skystore{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Категория: {{ category.name }}</h2>
+    <div class="row mt-3">
+        {% for product in products %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.title }}</h5>
+                        <p class="card-text">{{ product.description|truncatechars:100 }}</p>
+                        <a href="{% url 'catalog:product_detail' product.pk %}" class="btn btn-primary">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p>В этой категории пока нет товаров.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
