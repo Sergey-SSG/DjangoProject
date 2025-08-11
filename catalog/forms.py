@@ -1,4 +1,6 @@
 from django import forms
+from django.core.files.uploadedfile import UploadedFile
+
 from .models import Product
 from django.core.exceptions import ValidationError
 
@@ -73,7 +75,9 @@ class ProductForm(forms.ModelForm):
 
     def clean_image(self):
         image = self.cleaned_data.get('image')
-        if image:
+
+        # Проверяем, является ли изображение новым загруженным файлом
+        if isinstance(image, UploadedFile):
             if image.content_type not in ['image/jpeg', 'image/png']:
                 raise ValidationError('Допустимы только изображения JPEG или PNG')
             if image.size > 5 * 1024 * 1024:
